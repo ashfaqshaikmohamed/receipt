@@ -18,7 +18,9 @@ const ReviewItems: React.FC = () => {
       const { items: ocrItems, tax: ocrTax } = location.state.parsed;
       setItems(ocrItems.map((item: any, idx: number) => ({ 
         id: item.id || `ocr-${idx}-${Date.now()}`,
-        ...item, 
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity || 1,
         assignedTo: [], 
         comped: false 
       })));
@@ -47,6 +49,7 @@ const ReviewItems: React.FC = () => {
       id: `manual-${Date.now()}`,
       name: '',
       price: 0,
+      quantity: 1,
       assignedTo: [],
       comped: false
     };
@@ -84,22 +87,32 @@ const ReviewItems: React.FC = () => {
               onClick={() => setEditingItem(item)}
               className="card-gradient p-4 rounded-xl border border-border flex items-center justify-between active:scale-[0.98] transition-transform"
             >
-              <div className="flex-1">
-                <h3 className={`font-medium ${item.comped ? 'line-through text-text-secondary' : 'text-text-primary'}`}>
-                  {item.name || 'New Item'}
-                </h3>
-                <p className="text-xs text-text-secondary mt-1">
-                  {item.assignedTo.length === 0 ? (
-                    <span className="text-warning">Unassigned</span>
-                  ) : (
-                    <span>Assigned to {item.assignedTo.length} {item.assignedTo.length === 1 ? 'person' : 'people'}</span>
-                  )}
-                </p>
+              <div className="flex-1 flex items-center gap-3">
+                {item.quantity > 1 && (
+                  <span className="px-2 py-0.5 bg-accent/20 text-accent-soft text-[10px] font-bold rounded-full whitespace-nowrap">
+                    ×{item.quantity}
+                  </span>
+                )}
+                <div>
+                  <h3 className={`font-medium ${item.comped ? 'line-through text-text-secondary' : 'text-text-primary'}`}>
+                    {item.name || 'New Item'}
+                  </h3>
+                  <p className="text-xs text-text-secondary mt-0.5">
+                    {item.assignedTo.length === 0 ? (
+                      <span className="text-warning">Unassigned</span>
+                    ) : (
+                      <span>Assigned to {item.assignedTo.length} {item.assignedTo.length === 1 ? 'person' : 'people'}</span>
+                    )}
+                  </p>
+                </div>
               </div>
               <div className="text-right">
                 <p className={`font-semibold ${item.comped ? 'text-text-secondary' : 'text-accent'}`}>
-                  ${item.price.toFixed(2)}
+                  ${(item.price * item.quantity).toFixed(2)}
                 </p>
+                {item.quantity > 1 && (
+                  <p className="text-[10px] text-text-secondary/60">${item.price.toFixed(2)} ea</p>
+                )}
               </div>
             </motion.div>
           ))}
@@ -128,7 +141,7 @@ const ReviewItems: React.FC = () => {
                 type="number"
                 value={tax || ''}
                 onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
-                className="w-16 bg-transparent outline-none text-text-primary font-medium text-right"
+                className="w-16 bg-transparent outline-none text-text-primary font-medium text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
           </div>
@@ -178,7 +191,7 @@ const ReviewItems: React.FC = () => {
                     type="number"
                     value={tipAmount || ''}
                     onChange={(e) => setTipAmount(parseFloat(e.target.value) || 0)}
-                    className="w-20 bg-transparent outline-none text-text-primary font-bold text-right"
+                    className="w-20 bg-transparent outline-none text-text-primary font-bold text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </motion.div>
@@ -249,8 +262,19 @@ const ReviewItems: React.FC = () => {
                 </div>
                 
                 <div className="flex gap-4">
+                  <div className="w-24 space-y-2">
+                    <label className="text-xs text-text-secondary uppercase tracking-wider font-semibold">Qty</label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="1"
+                      value={editingItem.quantity || ''}
+                      onChange={(e) => setEditingItem({ ...editingItem, quantity: Math.max(1, parseInt(e.target.value) || 1) })}
+                      className="w-full h-14 bg-surface rounded-xl px-4 border border-border text-lg text-text-primary focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-center"
+                    />
+                  </div>
                   <div className="flex-1 space-y-2">
-                    <label className="text-xs text-text-secondary uppercase tracking-wider font-semibold">Price</label>
+                    <label className="text-xs text-text-secondary uppercase tracking-wider font-semibold">Price (per unit)</label>
                     <div className="relative">
                       <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={20} />
                       <input

@@ -30,6 +30,14 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
   }
+
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    50% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
 }
 
 @layer base {
@@ -59,6 +67,18 @@
 
   .card-gradient {
     background: linear-gradient(135deg, #13131a 0%, #16161f 100%);
+  }
+
+  .scanning-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #5b4fff, transparent);
+    box-shadow: 0 0 15px rgba(91, 79, 255, 0.8);
+    z-index: 20;
+    animation: scan 2s linear infinite;
   }
 
   .noise-overlay {
