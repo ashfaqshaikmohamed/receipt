@@ -34,7 +34,7 @@ service cloud.firestore {
           && data.paymentProfile.get('ownerName', '') is string
           && (
             // Create case
-            (data.keys().size() == 2 && data.createdAt is timestamp && data.createdAt == request.time) ||
+            (data.keys().size() == 2 && data.createdAt is timestamp) ||
             // Update case
             (data.keys().size() == 1) ||
             // Merge case / existing

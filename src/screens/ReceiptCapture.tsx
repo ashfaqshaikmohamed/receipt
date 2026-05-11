@@ -112,17 +112,18 @@ const ReceiptCapture: React.FC = () => {
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Exact data from the provided Burrito Bar receipt image
+                  // Exact data from the DineFine Restaurant receipt image
                   const mockData = {
                     items: [
-                      { id: 'mock-1', name: 'Chicken Burger', price: 8.79 },
-                      { id: 'mock-2', name: 'Large Drink', price: 4.99 },
-                      { id: 'mock-3', name: 'French Fries', price: 3.79 }
+                      { id: 'mock-1', name: '2X Caesar Salad', price: 24.00 },
+                      { id: 'mock-2', name: 'Grilled Salmon', price: 22.00 },
+                      { id: 'mock-3', name: 'Cheesecake', price: 7.50 },
+                      { id: 'mock-4', name: '2X Sparkling Water', price: 6.00 }
                     ],
-                    tax: 0.88,
-                    total: 18.45,
-                    subtotal: 17.57,
-                    restaurant: 'Burrito Bar'
+                    tax: 3.80,
+                    total: 51.30,
+                    subtotal: 47.50,
+                    restaurant: 'DineFine Restaurant'
                   };
                   
                   navigate('/review', { 

@@ -18,10 +18,23 @@ export const useAuth = () => {
 
   useEffect(() => {
     // Check for redirect result on mount
-    getRedirectResult(auth).catch((error) => {
-      console.error("Redirect auth error:", error);
-      setAuthError("Failed to complete Google Sign-In. Please try again.");
-    });
+    const checkRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        // If result is null, no redirect happened. If result exists, login was successful.
+        if (result) {
+          setAuthError(null);
+        }
+      } catch (error: any) {
+        // Ignore "no redirect operation" errors which are common on normal load
+        if (error.code !== 'auth/no-auth-event') {
+          console.error("Redirect auth error:", error);
+          setAuthError("Failed to complete Google Sign-In. Please try again.");
+        }
+      }
+    };
+
+    checkRedirect();
 
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       setUser(authUser);
@@ -34,8 +47,12 @@ export const useAuth = () => {
           if (userDoc.exists()) {
             const data = userDoc.data();
             if (data.paymentProfile) {
-              localStorage.setItem('receipt_payment_profile', JSON.stringify(data.paymentProfile));
-              window.dispatchEvent(new Event('paymentProfileUpdated'));
+              const existingProfile = localStorage.getItem('receipt_payment_profile');
+              // Only update local storage if it's different to avoid loops/excessive events
+              if (JSON.stringify(data.paymentProfile) !== existingProfile) {
+                localStorage.setItem('receipt_payment_profile', JSON.stringify(data.paymentProfile));
+                window.dispatchEvent(new Event('paymentProfileUpdated'));
+              }
             }
           } else {
             // First time user initialization
@@ -46,10 +63,13 @@ export const useAuth = () => {
               squareMerchantId: '',
               ownerName: authUser.displayName || ''
             };
+            
+            // Use setDoc for first-time profile creation
             await setDoc(userRef, {
               paymentProfile: defaultProfile,
               createdAt: serverTimestamp()
-            });
+            }, { merge: true });
+
             localStorage.setItem('receipt_payment_profile', JSON.stringify(defaultProfile));
           }
         } catch (error) {
